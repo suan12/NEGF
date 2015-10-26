@@ -2,14 +2,14 @@ from environment import *
 
 # constructing matrices
 f = 1.0
-omega = 1.8
-delta = 0.00001
-epsilon = 0.0000001
+omega = 1.5
+delta = 0.00000000000000000000001
+epsilon = 0.0000000001
 
-D11 = matrix([f])
+D11 = matrix([1*f])
 D22 = matrix([2*f])
 D12 = matrix([-f])
-I = matrix([1.0])
+I = matrix(eye(1))
 
 # calculate surface GF
 
@@ -24,5 +24,4 @@ while abs(tau1).max() > epsilon:
     Wb = Wb - tau1*Wb_I*tau2 - tau2*Wb_I*tau1
     tau1 = tau1*Wb_I*tau1
     tau2 = tau2*Wb_I*tau2
-
 print(Ws.I)
