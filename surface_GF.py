@@ -2,12 +2,11 @@ from environment import *
 
 # constructing matrices
 f = 1.0
-omega = 0.5
+omega = 1.5
 delta = 0.00000000000000000000001
 epsilon = 0.000000000001
-a = 1.0
 
-D11 = matrix([a*f])
+D11 = matrix([2*f])
 D22 = matrix([2*f])
 D12 = matrix([-f])
 I = matrix(eye(1))

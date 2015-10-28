@@ -3,4 +3,4 @@
 # array and matrix creation
 from numpy import matrix, array, zeros, eye
 # common math functions
-from numpy import sqrt
+from numpy import sqrt, trace
