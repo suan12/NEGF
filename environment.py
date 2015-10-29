@@ -4,3 +4,5 @@
 from numpy import matrix, array, zeros, eye
 # common math functions
 from numpy import sqrt, trace
+# functional programming
+from functools import reduce

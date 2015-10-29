@@ -3,7 +3,7 @@ from environment import *
 
 class Phonon(object):
 
-    def __init__(self, D, omega, delta=0.0001):
+    def __init__(self, D, omega, delta=0.0000000000001):
 
         """
         D should be a dictionary, the format is:
@@ -12,16 +12,37 @@ class Phonon(object):
         """
         self.D = D
         self.omega = omega
+        # size of primitive cells in left/right lead and center area
         self.size = {'l': D['lead']['l'][0].shape[0], 'r': D['lead']['r'][0].shape[0],
                      'c': D['on_site'][0].shape[0]}
+        # the number of cells in center area
         self.length = len(D['on_site'])
+        # self.GF is used to store green's function of any type
         self.GF = {'surface': {'l': None, 'r': None},
                    'center': zeros(self.length).tolist(), 'through': None}
+        # store self_energy of leads
         self.self_energy = {'l': None, 'r': None}
+        # self.delta is used in (omega + i delta)^2 to calculate green's function
         self.delta = delta
+        # store transmission probability
         self.T = None
+        # generate the whole D matrices
+        self.D_mat = zeros((self.length, self.length)).tolist()
+        for i in range(self.length):
+            self.D_mat[i][i] = D['on_site'][i]
+        for i in range(self.length - 1):
+            self.D_mat[i][i+1] = D['couple'][i]
+            self.D_mat[i+1][i] = D['couple'][i]
+        # generate the whole M matrices which is defined to be (omega + i delta)^2 - D
+        self.M = zeros((self.length, self.length)).tolist()
+        for i in range(self.length):
+            for j in range(self.length):
+                if i == j:
+                    self.M[i][j] = (omega + 1j*self.delta)**2*eye(self.size['c']) - self.D_mat[i][j]
+                else:
+                    self.M[i][j] = -self.D_mat[i][j]
 
-    def cal_surface_GF(self, epsilon=0.0001):
+    def cal_surface_GF(self, epsilon=0.0000000000001):
         """
         calculate surface green's function
         """
@@ -41,132 +62,52 @@ class Phonon(object):
             self.GF['surface'][lead] = Ws.I
 
     def cal_self_energy(self):
+        """
+        calculate self energy. Surface green's function must be calculated first
+        """
         for lead in ('l', 'r'):
             self.self_energy[lead] = \
                 self.D['lead_center'][lead]*self.GF['surface'][lead]*(self.D['lead_center'][lead].T)
 
-    def get_D_matrix(self, i, j):
-        if i == j:
-            return self.D['on_site'][i]
-        if i == j - 1:
-            return self.D['couple'][i]
-        if i == j + 1:
-            return self.D['couple'][j].T
-        else:
-            return zeros((self.size['c'], self.size['c']))
-
-    def get_M_matrix(self, i, j, omega):
-        return (omega + 1j*self.delta)**2*eye(self.size['c']) - self.get_D_matrix(i,j)
-
     def cal_GF(self, flag = 'minimal'):
-        omega = self.omega
-        g = zeros(self.length).tolist()
-        g[0] = (self.get_M_matrix(0, 0, omega) - self.self_energy['l']).I
-        for j in range(1, self.length - 1):
-            g[j] = (self.get_M_matrix(j, j, omega) -
-                    self.get_M_matrix(j, j-1, omega)*g[j-1]*self.get_M_matrix(j-1, j, omega)).I
-        g[self.length - 1] = (self.get_M_matrix(j, j, omega) - self.self_energy['r'] -
-                              self.get_M_matrix(j, j-1, omega)*g[j-1]*self.get_M_matrix(j-1, j, omega)).I
+        """
+        calculate green's function for center area. Self energy of leads must be calculated first
+        :param flag: minimal: calculate only G_NN, 'center': calculate all G_ii, 'through': calculate G_1N,
+        'all': all green's function
+        """
+        from operator import mul
+        length = self.length
+        g = zeros(length).tolist()
+        # forward iterating
+        g[0] = (self.M[0][0] - self.self_energy['l']).I
+        for j in range(1, length - 1):
+            g[j] = (self.M[j][j] -
+                    self.M[j][j-1]*g[j-1]*self.M[j-1][j]).I
+        if length == 1:
+            g[0] = (self.M[0][0] - self.self_energy['l'] - self.self_energy['r']).I
+        else:
+            g[self.length - 1] = (
+                self.M[length - 1][length - 1] - self.self_energy['r'] -
+                self.M[length - 1][length - 2]*g[length - 2]*self.M[length - 2][length - 1]
+                              ).I
+        # backward iterating
         G = self.GF['center']
         G[self.length - 1] = g[self.length - 1]
+        # calculate more green's function according to the flag
         if flag == 'center' or flag == 'all':
             for j in list(range(self.length - 1))[::-1]:
-                G[j] = g[j]*(1 + self.get_M_matrix(j, j+1, omega)*G[j+1]*self.get_M_matrix(j+1, j, omega)*g[j])
+                G[j] = g[j]*(1 + self.M[j][j+1]*G[j+1]*self.M[j+1][j]*g[j])
         if flag == 'through' or flag == 'all':
-            multiplier = eye(self.size['c'])
-            for j in range(self.length - 1):
-                multiplier = g[j]*self.get_M_matrix(j, j+1, omega)*multiplier
+            multiplier = reduce(mul, [g[j]*self.M[j][j+1] for j in range(length - 1)], 1)
             self.GF['through'] = multiplier*g[self.length - 1]
 
     def cal_T(self):
+        """
+        calculating transmission probability
+        """
         gamma_r = 1j*(self.self_energy['r'] - self.self_energy['r'].H)
         gamma_l = 1j*(self.self_energy['l'] - self.self_energy['l'].H)
         self.T = trace(gamma_r*self.GF['through'].H*gamma_l*self.GF['through'])
-'''
-from environment import *
-
-
-class Phonon(object):
-
-    def __init__(self, D, omega_list, delta = 0.0001):
-
-        """
-        D should be a dictionary, the format is:
-        D = {'on_site': [D00, D11, D22, D33 ...], 'lead':{'l': [Dl00, Dl01, Dl11], 'r': [Dr00, Dr01, Dr11],
-        'couple': [D01, D12, D23 ...], 'lead_center':{'l': Dlcl, 'r': Dlcr}}
-        omega_list is a list of frequencies to calculate
-        """
-        self.D = D
-        self.omega_list = omega_list
-        self.size = {'l': D['lead']['l'][0].shape[0], 'r': D['D_lead']['r'][0].shape[0],
-                     'c': D['lead']['c'][0].shape[0]}
-        self.length = len(D['on_site'])
-        self.GF = {'surface': {'l': zeros(len(omega_list)).tolist(), 'r': zeros(len(omega_list)).tolist()},
-                   'center': zeros((len(omega_list), self.length)).tolist(), 'through': None}
-        self.self_energy = {'l': zeros(len(omega_list)).tolist(), 'r': zeros(len(omega_list)).tolist()}
-        self.delta = delta
-
-    def cal_surface_GF(self, epsilon=0.0001):
-        """
-        calculate surface green's function
-        """
-        for i in range(len(self.omega_list)):
-            omega = self.omega_list[i]
-            for lead in ('l', 'r'):
-                I = eye(self.size[lead])
-                Ws = ((omega + 1j*self.delta)**2)*I - self.D['lead'][lead][0]
-                Wb = ((omega + 1j*self.delta)**2)*I - self.D['lead'][lead][2]
-                tau1 = self.D['lead'][lead][1]
-                tau2 = tau1.T
-                while abs(tau1).max() > epsilon:
-                    Wb_I = Wb.I
-                    Ws = Ws - tau1*Wb_I*tau2
-                    Wb = Wb - tau1*Wb_I*tau2 - tau2*Wb_I*tau1
-                    tau1 = tau1*Wb_I*tau1
-                    tau2 = tau1.T
-                self.GF['surface'][lead][i] = Ws.I
-
-    def cal_self_energy(self):
-        for i in range(len(self.omega_list)):
-            for lead in ('l', 'r'):
-                self.self_energy[lead][i] = \
-                    self.D['lead_center'][lead]*self.GF['surface'][i][lead]*(self.D['lead_center'][lead].T)
-
-    def get_D_matrix(self, i, j):
-        if i == j:
-            return self.D['on_site'][i]
-        if i == j - 1:
-            return self.D['couple'][i]
-        if i == j + 1:
-            return self.D['couple'][j].T
-        else:
-            return zeros((self.size['c'], self.size['c']))
-
-    def get_M_matrix(self, i, j, omega):
-        return (omega + 1j*self.delta)**2*eye(self.size['c']) - self.get_D_matrix[i,j]
-
-    def cal_GF(self, flag = 'minimal'):
-        for i in range(len(self.omega_list)):
-            omega = self.omega_list[i]
-            g = zeros(self.length).tolist()
-            g[0] = (self.get_M_matrix(0, 0, omega) - self.self_energy['l'][i]).I
-            for j in range(1, self.length - 1):
-                g[j] = (self.get_M_matrix(j, j, omega) -
-                        self.get_M_matrix(j, j-1, omega)*g[j-1]*self.get_M_matrix(j-1, j, omega)).I
-            g[self.length - 1] = (self.get_M_matrix(j, j, omega) - self.self_energy['r'][i] -
-                                  self.get_M_matrix(j, j-1, omega)*g[j-1]*self.get_M_matrix(j-1, j, omega)).I
-            G = self.GF['center'][i]
-            G[self.length - 1] = g[self.length - 1]
-            if flag == 'center':
-                for j in list(range(self.length - 1))[::-1]:
-                    G[j] = g[j](1 + self.get_M_matrix(j, j+1, omega)*G[j+1]*self.get_M_matrix(j+1, j, omega)*g[j])
-            if flag == 'through':
-                multiplier = eye(self.size['c'])
-                for j in range(self.length - 1):
-                    multiplier *= g[j]*self.get_M_matrix(j, j+1, omega)
-                self.GF['through'] = multiplier*g[self.length - 1]
-'''
-
 
 
 
