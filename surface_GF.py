@@ -6,10 +6,10 @@ omega = 1.5
 delta = 0.00000000000000000000001
 epsilon = 0.000000000001
 
-D11 = matrix([2*f])
-D22 = matrix([2*f])
-D12 = matrix([-f])
-I = matrix(eye(1))
+D11 = matrix([[2*f, 0, 0, 0], [0, f, 0, -f], [0, 0, 2*f, 0], [0, -f, 0, f]])
+D22 = matrix([[2*f, 0, 0, 0], [0, f, 0, -f], [0, 0, 2*f, 0], [0, -f, 0, f]])
+D12 = matrix([[-f, 0, 0, 0], [0, 0, 0, 0], [0, 0, -f, 0], [0, 0, 0, 0]])
+I = matrix(eye(4))
 
 # calculate surface GF
 

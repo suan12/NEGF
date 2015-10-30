@@ -27,8 +27,6 @@ Dlcl = matrix([-f])
 Dlcr = matrix([-f])
 D = {'on_site': [D00, D11, D22, D33, D44, D55, D66, D77], 'lead':{'l': [Dl00, Dl01, Dl11], 'r': [Dr00, Dr01, Dr11]},
      'couple': [D01, D12, D23, D34, D45, D56, D67], 'lead_center':{'l': Dlcl, 'r': Dlcr}}
-#D = {'on_site': [D00], 'lead':{'l': [Dl00, Dl01, Dl11], 'r': [Dr00, Dr01, Dr11]},
-#     'couple': [], 'lead_center':{'l': Dlcl, 'r': Dlcr}}
 test = Phonon(D, omega)
 test.cal_surface_GF()
 test.cal_self_energy()
