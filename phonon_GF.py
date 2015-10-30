@@ -3,7 +3,7 @@ from environment import *
 
 class Phonon(object):
 
-    def __init__(self, D, omega, delta=0.0000000000001):
+    def __init__(self, D, omega, delta=0.000001):
 
         """
         D should be a dictionary, the format is:
@@ -26,6 +26,7 @@ class Phonon(object):
         self.delta = delta
         # store transmission probability
         self.T = None
+        '''
         # generate the whole D matrices
         self.D_mat = zeros((self.length, self.length)).tolist()
         for i in range(self.length):
@@ -41,8 +42,19 @@ class Phonon(object):
                     self.M[i][j] = (omega + 1j*self.delta)**2*eye(self.size['c']) - self.D_mat[i][j]
                 else:
                     self.M[i][j] = -self.D_mat[i][j]
+        '''
 
-    def cal_surface_GF(self, epsilon=0.0000000000001):
+    def M(self, i, j):
+        if i == j:
+            return (self.omega + 1j*self.delta)**2*eye(self.size['c']) - self.D['on_site'][i]
+        if i + 1 == j:
+            return -self.D['couple'][i]
+        if i == j + 1:
+            return -self.D['couple'][j]
+
+
+
+    def cal_surface_GF(self, epsilon=0.000001):
         """
         calculate surface green's function
         """
@@ -79,16 +91,16 @@ class Phonon(object):
         length = self.length
         g = zeros(length).tolist()
         # forward iterating
-        g[0] = (self.M[0][0] - self.self_energy['l']).I
+        g[0] = (self.M(0, 0) - self.self_energy['l']).I
         for j in range(1, length - 1):
-            g[j] = (self.M[j][j] -
-                    self.M[j][j-1]*g[j-1]*self.M[j-1][j]).I
+            g[j] = (self.M(j, j) -
+                    self.M(j, j-1)*g[j-1]*self.M(j-1, j)).I
         if length == 1:
-            g[0] = (self.M[0][0] - self.self_energy['l'] - self.self_energy['r']).I
+            g[0] = (self.M(0, 0) - self.self_energy['l'] - self.self_energy['r']).I
         else:
             g[self.length - 1] = (
-                self.M[length - 1][length - 1] - self.self_energy['r'] -
-                self.M[length - 1][length - 2]*g[length - 2]*self.M[length - 2][length - 1]
+                self.M(length - 1, length - 1) - self.self_energy['r'] -
+                self.M(length - 1, length - 2)*g[length - 2]*self.M(length - 2, length - 1)
                               ).I
         # backward iterating
         G = self.GF['center']
@@ -96,9 +108,9 @@ class Phonon(object):
         # calculate more green's function according to the flag
         if flag == 'center' or flag == 'all':
             for j in list(range(self.length - 1))[::-1]:
-                G[j] = g[j]*(1 + self.M[j][j+1]*G[j+1]*self.M[j+1][j]*g[j])
+                G[j] = g[j]*(1 + self.M(j, j+1)*G[j+1]*self.M(j+1, j)*g[j])
         if flag == 'through' or flag == 'all':
-            multiplier = reduce(mul, [g[j]*self.M[j][j+1] for j in range(length - 1)], 1)
+            multiplier = reduce(mul, [g[j]*self.M(j, j+1) for j in range(length - 1)], 1)
             self.GF['through'] = multiplier*g[self.length - 1]
 
     def cal_T(self):
