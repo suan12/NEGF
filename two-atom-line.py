@@ -6,7 +6,7 @@ from environment import *
 from datetime import datetime
 #startTime = datetime.now()
 f = 1.0
-omega = 1.5
+omega = 0.5
 N = 10000
 D_self = matrix([[2*f, 0, 0, 0], [0, f, 0, -f], [0, 0, 2*f, 0], [0, -f, 0, f]])
 D_couple = matrix([[-f, 0, 0, 0], [0, 0, 0, 0], [0, 0, -f, 0], [0, 0, 0, 0]])

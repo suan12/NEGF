@@ -2,7 +2,7 @@ from phonon_GF import Phonon
 from environment import *
 f = 1.0
 omega = 1.5
-D00 = matrix([4*f])
+D00 = matrix([2*f])
 D11 = matrix([2*f])
 D22 = matrix([2*f])
 D33 = matrix([2*f])
