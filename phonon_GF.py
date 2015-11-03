@@ -19,7 +19,7 @@ class Phonon(object):
         self.length = len(D['on_site'])
         # self.GF is used to store green's function of any type
         self.GF = {'surface': {'l': None, 'r': None},
-                   'center': zeros(self.length).tolist(), 'through': None}
+                   'center': [0]*self.length, 'through': None}
         # store self_energy of leads
         self.self_energy = {'l': None, 'r': None}
         # self.delta is used in (omega + i delta)^2 to calculate green's function
@@ -70,7 +70,7 @@ class Phonon(object):
         """
         from operator import mul
         length = self.length
-        g = zeros(length).tolist()
+        g = [0]*length
         # forward iterating
         if length == 1:
             g[0] = (self.M(0, 0) - self.self_energy['l'] - self.self_energy['r']).I
@@ -83,16 +83,15 @@ class Phonon(object):
                 self.M(length - 1, length - 1) - self.self_energy['r'] -
                 self.M(length - 1, length - 2)*g[length - 2]*self.M(length - 2, length - 1)
                               ).I
-        # backward iterating
         G = self.GF['center']
         G[self.length - 1] = g[self.length - 1]
         # calculate more green's function according to the flag
+        # backward iterating
         if flag == 'center' or flag == 'all':
             for j in list(range(self.length - 1))[::-1]:
                 G[j] = g[j]*(1 + self.M(j, j+1)*G[j+1]*self.M(j+1, j)*g[j])
         if flag == 'through' or flag == 'all':
-            self.GF['through'] = reduce(mul, [g[j]*self.M(j, j+1) for j in range(length - 1)], 1)
-            self.GF['through'] = self.GF['through']*g[self.length - 1]
+            self.GF['through'] = reduce(mul, [g[j]*self.M(j, j+1) for j in range(length - 1)], 1)*g[self.length - 1]
 
     def cal_T(self):
         """
