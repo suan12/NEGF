@@ -1,4 +1,3 @@
-from phonon_GF import Phonon
 from environment import *
 f = 1.0
 omega = 1.5
@@ -27,28 +26,3 @@ Dlcl = matrix([-f])
 Dlcr = matrix([-f])
 D = {'on_site': [D00, D11, D22, D33, D44, D55, D66, D77], 'lead':{'l': [Dl00, Dl01, Dl11], 'r': [Dr00, Dr01, Dr11]},
      'couple': [D01, D12, D23, D34, D45, D56, D67], 'lead_center':{'l': Dlcl, 'r': Dlcr}}
-"""
-test = Phonon(D, omega)
-test.cal_surface_GF()
-test.cal_self_energy()
-test.cal_GF(flag='all')
-test.cal_T()
-print(test.GF)
-print(test.self_energy)
-print(test.T)
-"""
-N = 100
-omega_range =  linspace(0.00000001, 1, N)
-T = zeros(N)
-for i in range(N):
-    omega = omega_range[i]
-    system = Phonon(D, omega)
-    system.cal_surface_GF()
-    system.cal_self_energy()
-    system.cal_GF(flag='all')
-    system.cal_T()
-    T[i] = system.T.real
-print(omega_range)
-print(T)
-plt.plot(omega_range, T, 'ro-')
-plt.show()

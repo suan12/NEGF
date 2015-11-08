@@ -1,23 +1,18 @@
 from environment import *
-from phonon_GF import Phonon
-from datetime import datetime
-from numpy import save, load
-import pickle
-startTime = datetime.now()
 omega = 0.5
-n = 2
-m = 10
+n = 20
+m = 100
 out = 1
 g = rand(n, m-7)
 tmp = zeros((n, 3))
 tmp.fill(out)
 g = concatenate((tmp, g, tmp), axis=1)
-g.fill(1)
+#g.fill(1)
 f = rand(n-1, m-6)
 tmp = zeros((n-1, 3))
 tmp.fill(out)
 f = concatenate((tmp, f, tmp), axis=1)
-f.fill(1)
+#f.fill(1)
 D_self = []
 for i in range(m):
     D_self += [matrix(zeros((2*n,2*n)))]
@@ -45,15 +40,3 @@ for j in range(m-1):
         D_couple[j][2*i, 2*i] = - g[i, j]
 D = {'on_site': D_self[3: m-3], 'lead': {'l': [D_self[2], D_couple[1], D_self[1]], 'r': [D_self[m-3], D_couple[m-3], D_self[m-2]]},
      'couple': D_couple[3: m-4], 'lead_center': {'l': D_couple[2], 'r': D_couple[m-4]}}
-file = open("test.dat","wb")
-pickle.dump(D,file)
-file.close()
-file = open("test.dat","rb")
-a = pickle.load(file)
-test = Phonon(a, omega, 0.00000000000000000000000001)
-test.cal_surface_GF(0.000001)
-test.cal_self_energy()
-test.cal_GF(flag='all')
-test.cal_T()
-print(test.T)
-print(datetime.now() - startTime)
