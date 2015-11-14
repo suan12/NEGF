@@ -1,4 +1,4 @@
-from phonon_GF import Phonon
+from phonon_GF_jit import Phonon
 from environment import *
 from datetime import datetime
 from random_line import D
