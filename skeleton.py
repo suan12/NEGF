@@ -1,7 +1,7 @@
 from phonon_GF import Phonon
 from environment import *
 from datetime import datetime
-from random_line import D
+from one_atom_line import D
 N = 500
 omega_range = linspace(0.00000001, 3, N)
 T = zeros(N)
