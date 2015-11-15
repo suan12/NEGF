@@ -63,7 +63,7 @@ class System(object):
         self.length = len(D['on_site'])
         self.self_energy = [0]*self.length
         self.gf = {'center': [0]*self.length, 'through': None}
-        self.T = zeros((len(couplings), len(couplings)))
+        self.T = matrix(zeros((len(couplings), len(couplings))))
 
         for coupling in couplings:
             coupling.cal_self_engergy(E, order, delta, epsilon)
@@ -77,9 +77,9 @@ class System(object):
         if i == j:
             size = self.D['on_site'][i].shape[0]
             if self.order == 1:
-                (self.E + 1j*self.delta)*eye(size) - self.D['on_site'][i] - self.self_energy[i]
+                (self.E + 1j*self.delta)*matrix(eye(size)) - self.D['on_site'][i] - self.self_energy[i]
             else:
-                return (self.E + 1j*self.delta)**2*eye(size) - self.D['on_site'][i] - self.self_energy[i]
+                return (self.E + 1j*self.delta)**2*matrix(eye(size)) - self.D['on_site'][i] - self.self_energy[i]
         if i + 1 == j:
             return -self.D['couple'][i]
         if i == j + 1:
@@ -96,12 +96,9 @@ class System(object):
         g = [0]*length
         # forward iterating
         g[0] = self.M(0, 0).I
-        if length == 1:
-            pass
-        else:
-            for j in range(1, length):
-                g[j] = (self.M(j, j) -
-                        self.M(j, j-1)*g[j-1]*self.M(j-1, j)).I
+        for j in range(1, length):
+            g[j] = (self.M(j, j) -
+                    self.M(j, j-1)*g[j-1]*self.M(j-1, j)).I
         G = self.gf['center']
         G[self.length - 1] = g[self.length - 1]
         # calculate more green's function according to the flag
@@ -119,3 +116,4 @@ class System(object):
         gamma_i = 1j*(self.couplings[i].self_energy - self.couplings[i].self_energy.H)
         gamma_j = 1j*(self.couplings[j].self_energy - self.couplings[j].self_energy.H)
         self.T[i, j] = trace(gamma_i*self.gf['through'].H*gamma_j*self.gf['through']).real
+        self.T[j, i] = self.T[i, j]
