@@ -62,8 +62,9 @@ class System(object):
         # initializing
         self.length = len(D['on_site'])
         self.self_energy = [0]*self.length
-        self.gf = {'center': [0]*self.length, 'through': None}
+        self.gf = [[None]*self.length for i in range(self.length)]
         self.T = matrix(zeros((len(couplings), len(couplings))))
+        self.g = [0]*self.length
 
         for coupling in couplings:
             coupling.cal_self_engergy(E, order, delta, epsilon)
@@ -85,35 +86,48 @@ class System(object):
         if i == j + 1:
             return -self.D['couple'][j]
 
-    def cal_gf(self, flag='all'):
+    def cal_diag_gf(self):
         """
-        calculate green's function for center area.
-        :param flag: minimal: calculate only G_NN, 'center': calculate all G_ii, 'through': calculate G_1N,
-        'all': all green's function
+        calculate diagonal green's function for center area.
         """
-        from operator import mul
         length = self.length
-        g = [0]*length
+        g = self.g
         # forward iterating
         g[0] = self.M(0, 0).I
         for j in range(1, length):
             g[j] = (self.M(j, j) -
                     self.M(j, j-1)*g[j-1]*self.M(j-1, j)).I
-        G = self.gf['center']
-        G[self.length - 1] = g[self.length - 1]
+
+        G = self.gf
+        G[self.length - 1][self.length - 1] = g[self.length - 1]
         # calculate more green's function according to the flag
         # backward iterating
-        if flag == 'center' or flag == 'all':
-            for j in list(range(self.length - 1))[::-1]:
-                G[j] = g[j]*(1 + self.M(j, j+1)*G[j+1]*self.M(j+1, j)*g[j])
-        if flag == 'through' or flag == 'all':
-            self.gf['through'] = reduce(mul, [g[j]*self.M(j, j+1) for j in range(length - 1)], 1)*g[self.length - 1]
+        for j in list(range(self.length - 1))[::-1]:
+            G[j][j] = g[j]*(1 + self.M(j, j+1)*G[j+1][j+1]*self.M(j+1, j)*g[j])
+
+    def cal_gf(self, i, j):
+        """
+        calculate G_ij for center area
+        """
+        from operator import mul
+        G = self.gf
+        if i == j or G[i][j] is not None:
+            return None
+        if i > j:
+            i, j = j, i
+        g = self.g
+        G[i][j] = reduce(mul, [g[k]*-self.M(k, k+1) for k in range(i, j)], 1)*G[j][j]
+        G[j][i] = G[i][j]
+
 
     def cal_T(self, i, j):
         """
         calculating transmission probability from lead i to lead j
         """
+        ic= self.couplings[i].position
+        jc= self.couplings[j].position
+        self.cal_gf(ic, jc)
         gamma_i = 1j*(self.couplings[i].self_energy - self.couplings[i].self_energy.H)
         gamma_j = 1j*(self.couplings[j].self_energy - self.couplings[j].self_energy.H)
-        self.T[i, j] = trace(gamma_i*self.gf['through'].H*gamma_j*self.gf['through']).real
+        self.T[i, j] = trace(gamma_i*self.gf[ic][jc].H*gamma_j*self.gf[ic][jc]).real
         self.T[j, i] = self.T[i, j]

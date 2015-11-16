@@ -91,7 +91,7 @@ class Phonon(object):
             for j in list(range(self.length - 1))[::-1]:
                 G[j] = g[j]*(1 + self.M(j, j+1)*G[j+1]*self.M(j+1, j)*g[j])
         if flag == 'through' or flag == 'all':
-            self.GF['through'] = reduce(mul, [g[j]*self.M(j, j+1) for j in range(length - 1)], 1)*g[self.length - 1]
+            self.GF['through'] = reduce(mul, [g[j]*-self.M(j, j+1) for j in range(length - 1)], 1)*g[self.length - 1]
 
     def cal_T(self):
         """
