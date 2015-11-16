@@ -1,9 +1,12 @@
-from phonon_GF import Phonon
-from environment import *
-from scoop import futures
-from random_line import D
 import pickle
 from datetime import datetime
+
+from scoop import futures
+
+from environment import *
+from two_lead.phonon_GF import Phonon
+from two_lead.random_line import D
+
 N = 100
 omega_range =  linspace(0.00000001, 5, N)
 

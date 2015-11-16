@@ -1,7 +1,9 @@
-from phonon_GF import Phonon
-from environment import *
 from datetime import datetime
-from one_atom_line import D
+
+from environment import *
+from two_lead.one_atom_line import D
+from two_lead.phonon_GF import Phonon
+
 N = 500
 omega_range = linspace(0.00000001, 3, N)
 T = zeros(N)

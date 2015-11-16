@@ -1,5 +1,5 @@
 from environment import *
-from phonon_GF import Phonon
+from two_lead.phonon_GF import Phonon
 f = 1.0
 omega = 1.5
 D00 = matrix([2*f])

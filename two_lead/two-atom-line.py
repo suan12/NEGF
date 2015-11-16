@@ -1,9 +1,9 @@
 #import tracemalloc
 
 #tracemalloc.start()
-from phonon_GF import Phonon
 from environment import *
-from datetime import datetime
+from two_lead.phonon_GF import Phonon
+
 #startTime = datetime.now()
 f = 1.0
 omega = 0.5
