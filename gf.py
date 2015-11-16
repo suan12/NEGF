@@ -103,7 +103,7 @@ class System(object):
         # calculate more green's function according to the flag
         # backward iterating
         for j in list(range(self.length - 1))[::-1]:
-            G[j][j] = g[j]*(1 + self.M(j, j+1)*G[j+1][j+1]*self.M(j+1, j)*g[j])
+            G[j][j] = g[j] + g[j]*self.M(j, j+1)*G[j+1][j+1]*self.M(j+1, j)*g[j]
 
     def cal_gf(self, i, j):
         """
@@ -129,5 +129,5 @@ class System(object):
         self.cal_gf(ic, jc)
         gamma_i = 1j*(self.couplings[i].self_energy - self.couplings[i].self_energy.H)
         gamma_j = 1j*(self.couplings[j].self_energy - self.couplings[j].self_energy.H)
-        self.T[i, j] = trace(gamma_i*self.gf[ic][jc].H*gamma_j*self.gf[ic][jc]).real
+        self.T[i, j] = trace(gamma_j*self.gf[ic][jc].H*gamma_i*self.gf[ic][jc]).real
         self.T[j, i] = self.T[i, j]

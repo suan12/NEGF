@@ -1,6 +1,5 @@
 *.pyc
 *.db
-.idea/*
 *.npy
 .*
 *.jugdata/*

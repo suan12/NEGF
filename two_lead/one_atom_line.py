@@ -1,3 +1,4 @@
+##
 from environment import *
 from two_lead.phonon_GF import Phonon
 f = 1.0
@@ -6,7 +7,7 @@ D00 = matrix([2*f])
 D11 = matrix([2*f])
 D22 = matrix([2*f])
 D33 = matrix([2*f])
-D44 = matrix([f])
+D44 = matrix([2*f])
 D55 = matrix([2*f])
 D66 = matrix([2*f])
 D77 = matrix([2*f])
@@ -33,3 +34,8 @@ system.cal_self_energy()
 system.cal_GF(flag='all')
 system.cal_T()
 print(system.T)
+print('------------------')
+print(system.GF['center'][0])
+print('------------------')
+print(system.GF['center'][7])
+##
