@@ -68,7 +68,7 @@ class System(object):
 
         for coupling in couplings:
             coupling.cal_self_engergy(E, order, delta, epsilon)
-            self.self_energy[coupling.position] = coupling.self_energy
+            self.self_energy[coupling.position] += coupling.self_energy
 
 
     def M(self, i, j):
@@ -78,7 +78,7 @@ class System(object):
         if i == j:
             size = self.D['on_site'][i].shape[0]
             if self.order == 1:
-                (self.E + 1j*self.delta)*matrix(eye(size)) - self.D['on_site'][i] - self.self_energy[i]
+                return (self.E + 1j*self.delta)*matrix(eye(size)) - self.D['on_site'][i] - self.self_energy[i]
             else:
                 return (self.E + 1j*self.delta)**2*matrix(eye(size)) - self.D['on_site'][i] - self.self_energy[i]
         if i + 1 == j:
