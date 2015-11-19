@@ -33,7 +33,7 @@ class Phonon(object):
         if i + 1 == j:
             return -self.D['couple'][i]
         if i == j + 1:
-            return -self.D['couple'][j]
+            return -self.D['couple'][j].H
 
     def cal_surface_GF(self, epsilon=0.000001):
         """
