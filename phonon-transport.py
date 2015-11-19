@@ -1,7 +1,7 @@
-##
-# two atom line
 from environment import *
 from gf import Lead, Coupling, System
+'''
+# two atom line
 f = 1.0
 omega = 1.5
 Dl00 = matrix([[2*f, 0, 0, 0], [0, f, 0, -f], [0, 0, 2*f, 0], [0, -f, 0, f]])
@@ -49,7 +49,8 @@ print(gamma*test.gf[0][7].H*gamma*test.gf[0][7])
 print('------------------')
 print(test.gf[0][7])
 print(test.T)
-##
+'''
+'''
 # one atom line 3 leads
 from environment import *
 from gf import Lead, Coupling, System
@@ -101,7 +102,8 @@ print(test.couplings[0].self_energy)
 print('------------------')
 print(test.gf[0][7])
 print(test.T)
-##
+'''
+
 # one atom line two leads
 from environment import *
 from gf import Lead, Coupling, System
@@ -121,13 +123,13 @@ Dl11 = matrix([2*f])
 Dr00 = matrix([2*f])
 Dr01 = matrix([-f])
 Dr11 = matrix([2*f])
-D01 = matrix([-f])
+D01 = matrix([-0.01*f])
 D12 = matrix([-f])
 D23 = matrix([-f])
 D34 = matrix([-f])
 D45 = matrix([-f])
 D56 = matrix([-f])
-D67 = matrix([-f])
+D67 = matrix([-0.01*f])
 Dlcl = matrix([-f])
 Dlcr = matrix([-f])
 D = {'on_site': [D00, D11, D22, D33, D44, D55, D66, D77], 'lead':{'l': [Dl00, Dl01, Dl11], 'r': [Dr00, Dr01, Dr11]},
@@ -140,11 +142,12 @@ coupling2 = Coupling(lead2, 7, Dlcr)
 test = System(D, [coupling1, coupling2], 1.5, 2)
 test.cal_diag_gf()
 test.cal_T(0, 1)
-print('------------------')
-print(test.gf[7][7])
-print('------------------')
-print(test.couplings[0].self_energy)
-print('------------------')
-print(test.gf[0][7])
-print(test.T)
-##
+T = []
+omega_range = linspace(1.94985, 1.94987, 1000)
+for omega in omega_range:
+    system = System(D, [coupling1, coupling2], omega, 2)
+    system.cal_diag_gf()
+    system.cal_T(0, 1)
+    T.append(system.T[0, 1])
+plt.plot(omega_range, T)
+plt.show()
