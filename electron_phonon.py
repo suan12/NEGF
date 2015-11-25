@@ -1,26 +1,8 @@
 from environment import *
 from gf import Lead, Coupling, System
+#ele-phonon coupling
 '''
-lead0 = Lead(matrix([0]), matrix([-1]), matrix([0]))
-lead1 = Lead(matrix([0]), matrix([-1]), matrix([0]))
-lead2 = Lead(matrix([1]), matrix([-1]), matrix([1]))
-lead3 = Lead(matrix([1]), matrix([-1]), matrix([1]))
-
-coupling0 = Coupling(lead0, 0, matrix([-1]))
-coupling1 = Coupling(lead1, 0, matrix([-1]))
-coupling2 = Coupling(lead2, 1, matrix([-1]))
-coupling3 = Coupling(lead3, 1, matrix([-1]))
-
-system = System({'on_site': [matrix([0]), matrix([1])], 'couple': [matrix([-1])]}, [coupling0, coupling1, coupling2, coupling3], 0, 1)
-
-system.cal_diag_gf()
-system.cal_T(0,1)
-system.cal_T(0,2)
-system.cal_T(0,3)
-print(system.T)
-'''
-'''
-N = 8
+N = 10
 lam = 0.5
 t = 1
 t0 = 0.2
@@ -43,6 +25,7 @@ for E in E_range:
 plt.plot(E_range, T)
 plt.show()
 '''
+#ele-phonon coupling, using matrix
 '''
 lam = 0.5
 t = 1
@@ -71,99 +54,41 @@ for E in E_range:
     system.cal_T(0, 7)
     system.cal_T(0, 9)
     T.append(system.T[0, 1]+system.T[0, 3]+system.T[0, 5]+system.T[0, 7]+system.T[0, 9])
-plt.plot(E_range, T)
+plt.plot(E_range, T, 'o-')
 plt.show()
 '''
+#weak coupling blockade
 '''
 N = 1
-lam = 0.5
-t = 1
+t = 1.0
 t0 = 0.5
 couplings = []
 D = {'on_site': [], 'couple': []}
-couplings.append(Coupling(Lead(matrix([0]), matrix([-t]), matrix([0])), 0, matrix([-t])))
-couplings.append(Coupling(Lead(matrix([0]), matrix([-t]), matrix([0])), 4, matrix([-t])))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
+couplings.append(Coupling(Lead(matrix([0.]), matrix([-t]), matrix([0.])), 0, matrix([-t])))
+couplings.append(Coupling(Lead(matrix([0.]), matrix([-t]), matrix([0.])), 4, matrix([-t])))
+D['on_site'].append(matrix([0.]))
+D['on_site'].append(matrix([0.]))
+D['on_site'].append(matrix([1]))
+D['on_site'].append(matrix([0.]))
+D['on_site'].append(matrix([0.]))
 D['couple'].append(matrix([-t]))
 D['couple'].append(matrix([-t0]))
 D['couple'].append(matrix([-t0]))
 D['couple'].append(matrix([-t]))
 T = []
-E_range = linspace(-2, 2, 1000)
+E_range = linspace(0.5, 1.5, 1000)
 for E in E_range:
-    system = System(D, couplings, E, 1)
+    system = System(D, couplings, E, 1., 0.000000000000000001, 0.000000000000000001)
     system.cal_diag_gf()
     system.cal_T(0, 1)
     T.append(system.T[0, 1])
-plt.plot(E_range, T)
-t0 = 0.2
-D = {'on_site': [], 'couple': []}
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['couple'].append(matrix([-t]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t]))
-T = []
-E_range = linspace(-2, 2, 1000)
-for E in E_range:
-    system = System(D, couplings, E, 1)
-    system.cal_diag_gf()
-    system.cal_T(0, 1)
-    T.append(system.T[0, 1])
-plt.plot(E_range, T)
-t0 = 0.1
-D = {'on_site': [], 'couple': []}
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['couple'].append(matrix([-t]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t]))
-T = []
-E_range = linspace(-2, 2, 1000)
-for E in E_range:
-    system = System(D, couplings, E, 1)
-    system.cal_diag_gf()
-    system.cal_T(0, 1)
-    T.append(system.T[0, 1])
-plt.plot(E_range, T)
-t0 = 0.01
-D = {'on_site': [], 'couple': []}
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['on_site'].append(matrix([0]))
-D['couple'].append(matrix([-t]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t0]))
-D['couple'].append(matrix([-t]))
-T = []
-E_range = linspace(-0.01, 0.01, 1000)
-for E in E_range:
-    system = System(D, couplings, E, 1)
-    system.cal_diag_gf()
-    system.cal_T(0, 1)
-    T.append(system.T[0, 1])
-plt.plot(E_range, T)
+plt.plot(E_range, T, 'o-')
 plt.show()
 '''
-
-N = 1
-lam = 0.5
-t = 0.5
-t0 = 0.1
+#weak coupling pedestrian one line
+'''
+t = 1
+t0 = 0.2
 couplings = []
 D = {'on_site': [], 'couple': []}
 couplings.append(Coupling(Lead(matrix([0]), matrix([-t]), matrix([0])), 0, matrix([-t])))
@@ -184,5 +109,37 @@ for E in E_range:
     system.cal_diag_gf()
     system.cal_T(0, 1)
     T.append(system.T[0, 1])
-plt.plot(E_range, T)
+plt.plot(E_range, T, 'o-')
 plt.show()
+'''
+# weak coupling pedestrian several dangling atoms and several line
+'''
+N = 2
+M = 3
+t = 1
+t0 = 0.2
+couplings = []
+D_couple = matrix(zeros((N+M, N)))
+for i in range(N):
+    D_couple[i+M,i] = -t
+D_on_site = matrix(zeros((N+M, N+M)))
+for i in range(N+M-1):
+    if i == M-1:
+        D_on_site[i+1, i] = -t0
+        D_on_site[i, i+1] = -t0
+    else:
+        D_on_site[i+1, i] = -t
+        D_on_site[i, i+1] = -t
+D = {'on_site': [D_on_site], 'couple': []}
+couplings.append(Coupling(Lead(matrix(zeros((N, N))), matrix(eye(N))*-t, matrix(zeros((N, N)))), 0, D_couple))
+couplings.append(Coupling(Lead(matrix(zeros((N, N))), matrix(eye(N))*-t, matrix(zeros((N, N)))), 0, D_couple))
+T = []
+E_range = linspace(-2, 2, 1000)
+for E in E_range:
+    system = System(D, couplings, E, 1)
+    system.cal_diag_gf()
+    system.cal_T(0, 1)
+    T.append(system.T[0, 1])
+plt.plot(E_range, T, 'o-')
+plt.show()
+'''

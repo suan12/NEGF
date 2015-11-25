@@ -19,13 +19,13 @@ class Lead(object):
             ws = ((E + 1j*delta)**2)*I - self.D00
             wb = ((E + 1j*delta)**2)*I - self.D11
         tau1 = self.D01
-        tau2 = tau1.T
+        tau2 = tau1.H
         while abs(tau1).max() > epsilon:
             wb_I = wb.I
             ws = ws - tau1*wb_I*tau2
             wb = wb - tau1*wb_I*tau2 - tau2*wb_I*tau1
             tau1 = tau1*wb_I*tau1
-            tau2 = tau1.T
+            tau2 = tau2*wb_I*tau2
         self.gf= ws.I
 
 
@@ -41,7 +41,7 @@ class Coupling(object):
         lead = self.lead
         lead.cal_surface_gf(E, order, delta, epsilon)
         D_couple = self.D_couple
-        self.self_energy = D_couple*lead.gf*D_couple.T
+        self.self_energy = D_couple*lead.gf*D_couple.H
 
 
 class System(object):
