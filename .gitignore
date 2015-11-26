@@ -3,3 +3,5 @@
 *.npy
 .*
 *.jugdata/*
+*.dot
+*.stats

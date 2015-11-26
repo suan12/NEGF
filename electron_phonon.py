@@ -1,5 +1,8 @@
 from environment import *
-from gf import Lead, Coupling, System
+from gf_sparse import Lead, Coupling, System
+import datetime
+start_time = datetime.datetime.now()
+
 #ele-phonon coupling
 '''
 N = 10
@@ -113,12 +116,15 @@ plt.plot(E_range, T, 'o-')
 plt.show()
 '''
 # weak coupling pedestrian several dangling atoms and several line
-'''
 N = 2
-M = 3
+M = 100
 t = 1
 t0 = 0.2
 couplings = []
+D_couple_lead = matrix(zeros((N, N)))
+for i in range(N-1):
+    D_couple_lead[i+1,i]= -t
+    D_couple_lead[i,i+1]= -t
 D_couple = matrix(zeros((N+M, N)))
 for i in range(N):
     D_couple[i+M,i] = -t
@@ -131,8 +137,10 @@ for i in range(N+M-1):
         D_on_site[i+1, i] = -t
         D_on_site[i, i+1] = -t
 D = {'on_site': [D_on_site], 'couple': []}
-couplings.append(Coupling(Lead(matrix(zeros((N, N))), matrix(eye(N))*-t, matrix(zeros((N, N)))), 0, D_couple))
-couplings.append(Coupling(Lead(matrix(zeros((N, N))), matrix(eye(N))*-t, matrix(zeros((N, N)))), 0, D_couple))
+coupling1 = Coupling(Lead(D_couple_lead, matrix(eye(N))*-t, D_couple_lead), 0, D_couple)
+coupling2 = Coupling(Lead(D_couple_lead, matrix(eye(N))*-t, D_couple_lead), 0, D_couple)
+couplings.append(coupling1)
+couplings.append(coupling2)
 T = []
 E_range = linspace(-2, 2, 1000)
 for E in E_range:
@@ -141,5 +149,5 @@ for E in E_range:
     system.cal_T(0, 1)
     T.append(system.T[0, 1])
 plt.plot(E_range, T, 'o-')
-plt.show()
-'''
+print((datetime.datetime.now() - start_time).total_seconds())
+#plt.show()
